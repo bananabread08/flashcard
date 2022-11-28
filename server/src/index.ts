@@ -1,20 +1,30 @@
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import cors from 'cors';
+import Deck from './models/Deck';
+
 dotenv.config();
-
 const app = express();
+const PORT = 5001;
 
-// MongoDB
-const mongoDB = process.env.MONGO_URI;
-const db = mongoose.connect(mongoDB);
+app.use(cors());
+app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('HOME');
 });
 
-app.get('/hello', (req: Request, res: Response) => {
-  res.send('hello world');
+app.post('/decks', async (req: Request, res: Response) => {
+  const deck = new Deck({
+    title: req.body.title,
+  });
+  const createDeck = await deck.save();
+  res.json(createDeck);
 });
 
-app.listen(5001);
+// MongoDB
+mongoose.connect(process.env.MONGO_URI!).then(() => {
+  console.log(`listening on port ${PORT}`);
+  app.listen(PORT);
+});
